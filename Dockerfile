@@ -25,7 +25,10 @@ RUN set -eu && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --chmod=755 ./src /run/
+RUN dos2unix /run/*
+
 COPY --chmod=755 ./assets /run/assets
+RUN dos2unix /run/assets/*
 
 ADD --chmod=755 https://raw.githubusercontent.com/christgau/wsdd/v0.8/src/wsdd.py /usr/sbin/wsdd
 ADD --chmod=664 https://github.com/qemus/virtiso/releases/download/v0.1.248/virtio-win-0.1.248.tar.xz /drivers.txz
@@ -35,7 +38,7 @@ VOLUME /storage
 
 ENV RAM_SIZE "4G"
 ENV CPU_CORES "2"
-ENV DISK_SIZE "64G"
-ENV VERSION "win11"
+ENV DISK_SIZE "50G"
+ENV VERSION "win11e"
 
 ENTRYPOINT ["/usr/bin/tini", "-s", "/run/entry.sh"]

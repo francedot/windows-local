@@ -35,7 +35,7 @@ boot() {
         grep -Fq "BOOTMGR is missing" "$QEMU_PTY" && fail="y"
       fi
       if [ -z "$fail" ]; then
-        info "Windows started succesfully, visit http://localhost:8006/ to view the screen..."
+        info "Windows has started successfully. You can connect using either a web browser or RDP, both accessible at localhost on the specified ports..."
         return 0
       fi
     fi

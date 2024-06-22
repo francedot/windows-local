@@ -430,9 +430,6 @@ selectVersion() {
   prefer="$id-enterprise"
   hasVersion "$prefer" "$tag" "$xml" && echo "$prefer" && return 0
 
-  prefer="$id-ultimate"
-  hasVersion "$prefer" "$tag" "$xml" && echo "$prefer" && return 0
-
   prefer="$id"
   hasVersion "$prefer" "$tag" "$xml" && echo "$prefer" && return 0
 
@@ -511,8 +508,6 @@ detectImage() {
 
   if [ -n "$DETECTED" ]; then
 
-    skipVersion "${DETECTED,,}" && return 0
-
     if ! setXML "" && [[ "$MANUAL" != [Yy1]* ]]; then
       MANUAL="Y"
       desc=$(printEdition "$DETECTED" "this version")
@@ -523,12 +518,6 @@ detectImage() {
   fi
 
   info "Detecting version from ISO image..."
-
-  if detectLegacy "$dir"; then
-    desc=$(printEdition "$DETECTED" "$DETECTED")
-    info "Detected: $desc"
-    return 0
-  fi
 
   local src wim info
   src=$(find "$dir" -maxdepth 1 -type d -iname sources | head -n 1)
@@ -592,9 +581,6 @@ prepareImage() {
 
   desc=$(printVersion "$DETECTED" "$DETECTED")
 
-  ! setMachine "$DETECTED" "$iso" "$dir" "$desc" && return 1
-  skipVersion "$DETECTED" && return 0
-
   if [[ "${BOOT_MODE,,}" != "windows_legacy" ]]; then
 
     [ -f "$dir/$ETFS" ] && [ -f "$dir/$EFISYS" ] && return 0
@@ -649,10 +635,10 @@ updateXML() {
   user=$(echo "$USERNAME" | sed 's/[^[:alnum:]@!._-]//g')
 
   if [ -n "$user" ]; then
-    sed -i "s/<Name>Docker<\/Name>/<Name>$user<\/Name>/g" "$asset"
-    sed -i "s/where name=\"Docker\"/where name=\"$user\"/g" "$asset"
-    sed -i "s/<FullName>Docker<\/FullName>/<FullName>$user<\/FullName>/g" "$asset"
-    sed -i "s/<Username>Docker<\/Username>/<Username>$user<\/Username>/g" "$asset"
+    sed -i "s/<Name>Windows<\/Name>/<Name>$user<\/Name>/g" "$asset"
+    sed -i "s/where name=\"Windows\"/where name=\"$user\"/g" "$asset"
+    sed -i "s/<FullName>Windows<\/FullName>/<FullName>$user<\/FullName>/g" "$asset"
+    sed -i "s/<Username>Windows<\/Username>/<Username>$user<\/Username>/g" "$asset"
   fi
 
   if [ -n "$PASSWORD" ]; then
@@ -791,8 +777,6 @@ updateImage() {
   local org="${file//.xml/.org}"
   local dat="${file//.xml/.dat}"
   local desc path src wim xml index result
-
-  skipVersion "${DETECTED,,}" && return 0
 
   if [ ! -s "$asset" ] || [ ! -f "$asset" ]; then
     asset=""
@@ -1045,10 +1029,8 @@ if ! startInstall; then
 fi
 
 if [ ! -s "$ISO" ] || [ ! -f "$ISO" ]; then
-  if ! downloadImage "$ISO" "$VERSION" "$LANGUAGE"; then
-    rm -f "$ISO" 2> /dev/null || true
-    exit 61
-  fi
+  echo "Error: ISO file not found or is empty."
+  exit 61
 fi
 
 if ! extractImage "$ISO" "$DIR" "$VERSION"; then

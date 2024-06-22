@@ -4,13 +4,12 @@ set -Eeuo pipefail
 : "${BOOT_MODE:="windows"}"
 
 APP="Windows"
-SUPPORT="https://github.com/dockur/windows"
+SUPPORT="https://github.com/francedot/windows-local/issues"
 
 cd /run
 
 . reset.sh      # Initialize system
 . define.sh     # Define versions
-. mido.sh       # Download code
 . install.sh    # Run installation
 . disk.sh       # Initialize disks
 . display.sh    # Initialize graphics
