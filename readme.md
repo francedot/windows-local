@@ -3,16 +3,10 @@
 <a href="https://github.com/dockur/windows"><img src="https://github.com/dockur/windows/raw/master/.github/logo.png" title="Logo" style="max-width:100%;" width="128" /></a>
 </div>
 <div align="center">
-
-[![Build]][build_url]
-[![Version]][tag_url]
-[![Size]][tag_url]
-[![Package]][pkg_url]
-[![Pulls]][hub_url]
-
+ 
 </div></h1>
 
-Windows inside a Docker container.
+Local Windows inside a Docker container.
 
 ## Features ✨
 
