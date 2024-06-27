@@ -27,7 +27,7 @@ jobs:
       id: version_tag
       run: |
         if [[ $GITHUB_REF == refs/tags/* ]]; then
-          echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/tags/})"
+          echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/tags/})" | tr 'v' ''
         else
           exit 1
         fi
