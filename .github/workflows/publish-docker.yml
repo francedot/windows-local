@@ -35,7 +35,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/windows-local:${{ steps.version_tag.outputs.version }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/windows-local:1.0.0
 
       - name: Build and push latest
         uses: docker/build-push-action@v2
