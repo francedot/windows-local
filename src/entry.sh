@@ -4,7 +4,7 @@ set -Eeuo pipefail
 : "${BOOT_MODE:="windows"}"
 
 APP="Windows"
-SUPPORT="https://github.com/francedot/windows-local/issues"
+SUPPORT="https://github.com/dockur/windows/issues"
 
 cd /run
 

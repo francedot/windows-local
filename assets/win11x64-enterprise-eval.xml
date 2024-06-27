@@ -130,7 +130,7 @@
         <SupportHours>24/7</SupportHours>
         <SupportPhone />
         <SupportProvider>Windows</SupportProvider>
-        <SupportURL>https://github.com/francedot/windows-local/issues</SupportURL>
+        <SupportURL>https://github.com/dockur/windows/issues</SupportURL>
       </OEMInformation>
       <OEMName>Windows</OEMName>
     </component>
