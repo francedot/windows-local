@@ -25,7 +25,7 @@ jobs:
 
     - name: Extract version tag
       id: version_tag
-      run: echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/tags/v})"
+      run: echo "##[set-output name=version;]$(echo $GITHUB_REF | sed -e 's,.*/,,')"
 
     - name: Build and push
       uses: docker/build-push-action@v2
