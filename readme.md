@@ -1,62 +1,19 @@
-<h1 align="center">Windows<br />
+<h1 align="center">Local Windows on Docker<br />
 <div align="center">
 <a href="https://github.com/dockur/windows"><img src="https://github.com/dockur/windows/raw/master/.github/logo.png" title="Logo" style="max-width:100%;" width="128" /></a>
 </div>
 <div align="center">
-
-[![Build]][build_url]
-[![Version]][tag_url]
-[![Size]][tag_url]
-[![Package]][pkg_url]
-[![Pulls]][hub_url]
-
+ 
 </div></h1>
 
-Windows inside a Docker container.
-
-## Features ✨
-
- - Multi-language
- - ISO downloader
- - KVM acceleration
- - Web-based viewer
-
-## Video 📺
-
-[![Youtube](https://img.youtube.com/vi/xhGYobuG508/0.jpg)](https://www.youtube.com/watch?v=xhGYobuG508)
+Local Windows inside a Docker container.
 
 ## Usage 🐳
-
-Via Docker Compose:
-
-```yaml
-services:
-  windows:
-    image: dockurr/windows
-    container_name: windows
-    environment:
-      VERSION: "win11"
-    devices:
-      - /dev/kvm
-    cap_add:
-      - NET_ADMIN
-    ports:
-      - 8006:8006
-      - 3389:3389/tcp
-      - 3389:3389/udp
-    stop_grace_period: 2m
-```
 
 Via Docker CLI:
 
 ```bash
-docker run -it --rm -p 8006:8006 --device=/dev/kvm --cap-add NET_ADMIN --stop-timeout 120 dockurr/windows
-```
-
-Via Kubernetes:
-
-```shell
-kubectl apply -f kubernetes.yml
+docker run -it --rm -p 8006:8006 --device=/dev/kvm --cap-add NET_ADMIN --mount type=bind,source=./custom.iso,target=/custom.iso --stop-timeout 120 windows-local:latest
 ```
 
 ## FAQ 💬
@@ -72,44 +29,6 @@ kubectl apply -f kubernetes.yml
   - Once you see the desktop, your Windows installation is ready for use.
   
   Enjoy your brand new machine, and don't forget to star this repo!
-
-### How do I select the Windows version?
-
-  By default, Windows 11 will be installed. But you can add the `VERSION` environment variable to your compose file, in order to specify an alternative Windows version to be downloaded:
-
-  ```yaml
-  environment:
-    VERSION: "win11"
-  ```
-
-  Select from the values below:
-  
-  | **Value** | **Version**              | **Size** |
-  |---|---|---|
-  | `win11`   | Windows 11 Pro           | 6.4 GB   |
-  | `win11e`  | Windows 11 Enterprise    | 5.8 GB   |
-  | `win10`   | Windows 10 Pro           | 5.7 GB   |
-  | `ltsc10`  | Windows 10 LTSC          | 4.6 GB   |
-  | `win10e`  | Windows 10 Enterprise    | 5.2 GB   |
-  ||||  
-  | `win8`    | Windows 8.1 Pro          | 4.0 GB   |
-  | `win8e`   | Windows 8.1 Enterprise   | 3.7 GB   |
-  | `win7`    | Windows 7 Enterprise     | 3.0 GB   |
-  | `vista`   | Windows Vista Enterprise | 3.0 GB   |
-  | `winxp`   | Windows XP Professional  | 0.6 GB   |
-  ||||
-  | `2022`    | Windows Server 2022      | 4.7 GB   |
-  | `2019`    | Windows Server 2019      | 5.3 GB   |
-  | `2016`    | Windows Server 2016      | 6.5 GB   |
-  | `2012`    | Windows Server 2012      | 4.3 GB   |
-  | `2008`    | Windows Server 2008      | 3.0 GB   |
-  ||||
-  | `core11`  | Tiny 11 Core             | 2.1 GB   |
-  | `tiny11`  | Tiny 11                  | 3.8 GB   |
-  | `tiny10`  | Tiny 10                  | 3.6 GB   |
-
-> [!TIP]
-> To install ARM64 versions of Windows use [dockur/windows-arm](https://github.com/dockur/windows-arm/).
 
 ### How do I select the Windows language?
 
@@ -172,24 +91,6 @@ kubectl apply -f kubernetes.yml
 > [!TIP]
 > You can map this path to a drive letter in Windows, for easier access.
 
-### How do I install a custom image?
-
-  In order to download an unsupported ISO image that is not selectable from the list above, specify the URL of that ISO in the `VERSION` environment variable, for example:
-  
-  ```yaml
-  environment:
-    VERSION: "https://example.com/win.iso"
-  ```
-
-  Alternatively, you can also skip the download and use a local file instead, by binding it in your compose file in this way:
-  
-  ```yaml
-  volumes:
-    - /home/user/example.iso:/custom.iso
-  ```
-
-  Replace the example path `/home/user/example.iso` with the filename of your desired ISO file, the value of `VERSION` will be ignored in this case.
-
 ### How do I run a script after installation?
 
   To run your own script after installation, you can create a file called `install.bat` and place it in a folder together with any additional files it needs (software to be installed for example). Then bind that folder in your compose file like this:
@@ -200,17 +101,6 @@ kubectl apply -f kubernetes.yml
   ```
 
   The example folder `/home/user/example` will be copied to `C:\OEM` during installation and the containing `install.bat` will be executed during the last step.
-
-### How do I perform a manual installation?
-
-  It's best to stick to the automatic installation, as it adjusts various settings to prevent common issues when running Windows inside a virtual environment.
-
-  However, if you insist on performing the installation manually, add the following environment variable to your compose file:
-
-  ```yaml
-  environment:
-    MANUAL: "Y"
-  ```
 
 ### How do I change the amount of CPU or RAM?
 
@@ -241,8 +131,6 @@ kubectl apply -f kubernetes.yml
   The web-viewer is mainly meant to be used during installation, as its picture quality is low, and it has no audio or clipboard for example.
 
   So for a better experience you can connect using any Microsoft Remote Desktop client to the IP of the container, using the username `Docker` and by leaving the password empty.
-
-  There is a RDP client for [Android](https://play.google.com/store/apps/details?id=com.microsoft.rdc.androidx) available from the Play Store and one for [iOS](https://apps.apple.com/nl/app/microsoft-remote-desktop/id714464092?l=en-GB) in the Apple Store. For Linux you can use [FreeRDP](https://www.freerdp.com/) and on Windows just type `mstsc` in the search box.
 
 ### How do I assign an individual IP address to the container?
 
@@ -358,29 +246,3 @@ kubectl apply -f kubernetes.yml
   - you are not using a cloud provider, as most of them do not allow nested virtualization for their VPS's.
 
   If you didn't receive any error from `kvm-ok` at all, but the container still complains that `/dev/kvm` is missing, it might help to add `privileged: true` to your compose file (or `--privileged` to your `run` command), to rule out any permission issue.
-
-### How do I run macOS in a container?
-
-  You can use [dockur/macos](https://github.com/dockur/macos) for that. It shares many of the same features, except for the automatic installation.
-
-### Is this project legal?
-
-  Yes, this project contains only open-source code and does not distribute any copyrighted material. Any product keys found in the code are just generic placeholders provided by Microsoft for trial purposes. So under all applicable laws, this project will be considered legal.
-
-## Stars 🌟
-[![Stars](https://starchart.cc/dockur/windows.svg?variant=adaptive)](https://starchart.cc/dockur/windows)
-
-## Disclaimer ⚖️
-
-*The product names, logos, brands, and other trademarks referred to within this project are the property of their respective trademark holders. This project is not affiliated, sponsored, or endorsed by Microsoft Corporation.*
-
-[build_url]: https://github.com/dockur/windows/
-[hub_url]: https://hub.docker.com/r/dockurr/windows/
-[tag_url]: https://hub.docker.com/r/dockurr/windows/tags
-[pkg_url]: https://github.com/dockur/windows/pkgs/container/windows
-
-[Build]: https://github.com/dockur/windows/actions/workflows/build.yml/badge.svg
-[Size]: https://img.shields.io/docker/image-size/dockurr/windows/latest?color=066da5&label=size
-[Pulls]: https://img.shields.io/docker/pulls/dockurr/windows.svg?style=flat&label=pulls&logo=docker
-[Version]: https://img.shields.io/docker/v/dockurr/windows/latest?arch=amd64&sort=semver&color=066da5
-[Package]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fipitio%2Fghcr-pulls%2Fmaster%2Findex.json&query=%24%5B%3F(%40.owner%3D%3D%22dockur%22%20%26%26%20%40.repo%3D%3D%22windows%22%20%26%26%20%40.image%3D%3D%22windows%22)%5D.pulls&logo=github&style=flat&color=066da5&label=pulls
