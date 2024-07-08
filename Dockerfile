@@ -34,7 +34,7 @@ ADD --chmod=755 https://raw.githubusercontent.com/christgau/wsdd/v0.8/src/wsdd.p
 ADD --chmod=664 https://github.com/qemus/virtiso/releases/download/v0.1.248/virtio-win-0.1.248.tar.xz /drivers.txz
 
 EXPOSE 8006 3389
-VOLUME /storage
+# VOLUME /storage
 
 ENV RAM_SIZE "4G"
 ENV CPU_CORES "2"
