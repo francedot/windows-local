@@ -430,6 +430,9 @@ selectVersion() {
   prefer="$id-enterprise"
   hasVersion "$prefer" "$tag" "$xml" && echo "$prefer" && return 0
 
+  prefer="$id-ultimate"
+  hasVersion "$prefer" "$tag" "$xml" && echo "$prefer" && return 0
+
   prefer="$id"
   hasVersion "$prefer" "$tag" "$xml" && echo "$prefer" && return 0
 
@@ -508,6 +511,8 @@ detectImage() {
 
   if [ -n "$DETECTED" ]; then
 
+    skipVersion "${DETECTED,,}" && return 0
+
     if ! setXML "" && [[ "$MANUAL" != [Yy1]* ]]; then
       MANUAL="Y"
       desc=$(printEdition "$DETECTED" "this version")
@@ -518,6 +523,12 @@ detectImage() {
   fi
 
   info "Detecting version from ISO image..."
+
+  if detectLegacy "$dir"; then
+    desc=$(printEdition "$DETECTED" "$DETECTED")
+    info "Detected: $desc"
+    return 0
+  fi
 
   local src wim info
   src=$(find "$dir" -maxdepth 1 -type d -iname sources | head -n 1)
@@ -580,6 +591,9 @@ prepareImage() {
   local desc missing
 
   desc=$(printVersion "$DETECTED" "$DETECTED")
+
+  ! setMachine "$DETECTED" "$iso" "$dir" "$desc" && return 1
+  skipVersion "$DETECTED" && return 0
 
   if [[ "${BOOT_MODE,,}" != "windows_legacy" ]]; then
 
@@ -664,7 +678,21 @@ addDriver() {
   local folder=""
 
   case "${id,,}" in
+    "win7x86"* ) folder="w7/x86" ;;
+    "win7x64"* ) folder="w7/amd64" ;;
+    "win81x64"* ) folder="w8.1/amd64" ;;
+    "win10x64"* ) folder="w10/amd64" ;;
     "win11x64"* ) folder="w11/amd64" ;;
+    "win2025"* ) folder="w11/amd64" ;;
+    "win2022"* ) folder="2k22/amd64" ;;
+    "win2019"* ) folder="2k19/amd64" ;;
+    "win2016"* ) folder="2k16/amd64" ;;
+    "win2012"* ) folder="2k12R2/amd64" ;;
+    "win2008"* ) folder="2k8R2/amd64" ;;
+    "win10arm64"* ) folder="w10/ARM64" ;;
+    "win11arm64"* ) folder="w11/ARM64" ;;
+    "winvistax86"* ) folder="2k8/x86" ;;
+    "winvistax64"* ) folder="2k8/amd64" ;;
   esac
 
   if [ -z "$folder" ]; then
@@ -672,6 +700,10 @@ addDriver() {
   fi
 
   [ ! -d "$path/$driver/$folder" ] && return 0
+
+  if [[ "${id,,}" == "winvista"* ]]; then
+    [[ "${driver,,}" == "viorng" ]] && return 0
+  fi
 
   local dest="$path/$target/$driver"
   mv "$path/$driver/$folder" "$dest"
@@ -759,6 +791,8 @@ updateImage() {
   local org="${file//.xml/.org}"
   local dat="${file//.xml/.dat}"
   local desc path src wim xml index result
+
+  skipVersion "${DETECTED,,}" && return 0
 
   if [ ! -s "$asset" ] || [ ! -f "$asset" ]; then
     asset=""
@@ -905,8 +939,25 @@ buildImage() {
     error "Not enough free space in $STORAGE, have $space_gb GB available but need at least $size_gb GB." && return 1
   fi
 
-  ! genisoimage -o "$out" -b "$ETFS" -no-emul-boot -c "$cat" -iso-level 4 -J -l -D -N -joliet-long -relaxed-filenames -V "${LABEL::30}" \
+  if [[ "${BOOT_MODE,,}" != "windows_legacy" ]]; then
+
+    ! genisoimage -o "$out" -b "$ETFS" -no-emul-boot -c "$cat" -iso-level 4 -J -l -D -N -joliet-long -relaxed-filenames -V "${LABEL::30}" \
                   -udf -boot-info-table -eltorito-alt-boot -eltorito-boot "$EFISYS" -no-emul-boot -allow-limited-size -quiet "$dir" 2> "$log" && failed="y"
+
+  else
+
+    case "${DETECTED,,}" in
+      "win2k"* | "winxp"* | "win2003"* )
+        ! genisoimage -o "$out" -b "$ETFS" -no-emul-boot -boot-load-seg 1984 -boot-load-size 4 -c "$cat" -iso-level 2 -J -l -D -N -joliet-long \
+                      -relaxed-filenames -V "${LABEL::30}" -quiet "$dir" 2> "$log" && failed="y" ;;
+      "win9"* )
+        ! genisoimage -o "$out" -b "$ETFS" -J -r -V "${LABEL::30}" -quiet "$dir" 2> "$log" && failed="y" ;;
+      * )
+        ! genisoimage -o "$out" -b "$ETFS" -no-emul-boot -c "$cat" -iso-level 2 -J -l -D -N -joliet-long -relaxed-filenames -V "${LABEL::30}" \
+                      -udf -allow-limited-size -quiet "$dir" 2> "$log" && failed="y" ;;
+    esac
+
+  fi
 
   if [ -n "$failed" ]; then
     [ -s "$log" ] && echo "$(<"$log")"
@@ -994,8 +1045,10 @@ if ! startInstall; then
 fi
 
 if [ ! -s "$ISO" ] || [ ! -f "$ISO" ]; then
-  echo "Error: ISO file not found or is empty."
-  exit 61
+  if ! downloadImage "$ISO" "$VERSION" "$LANGUAGE"; then
+    rm -f "$ISO" 2> /dev/null || true
+    exit 61
+  fi
 fi
 
 if ! extractImage "$ISO" "$DIR" "$VERSION"; then
