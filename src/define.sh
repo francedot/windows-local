@@ -29,7 +29,7 @@ parseVersion() {
     "11" | "11p" | "win11" | "win11p" | "windows11" | "windows 11" )
       VERSION="win11x64"
       ;;
-    "11e" | "win11e" | "windows11e" | "windows 11e" )
+    "11e" | "win11e" | "windows11e" | "windows 11e" | "win11x64-enterprise-eval" )
       VERSION="win11x64-enterprise-eval"
       ;;
   esac

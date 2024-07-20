@@ -78,8 +78,8 @@
       </UpgradeData>
       <UserData>
         <AcceptEula>true</AcceptEula>
-        <FullName>Windows</FullName>
-        <Organization>Windows</Organization>
+        <FullName>Docker</FullName>
+        <Organization>Windows for Docker</Organization>
       </UserData>
       <EnableFirewall>false</EnableFirewall>
       <Diagnostics>
@@ -125,14 +125,14 @@
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
       <ComputerName>*</ComputerName>
       <OEMInformation>
-        <Manufacturer>Windows</Manufacturer>
-        <Model>Windows</Model>
+        <Manufacturer>Dockur</Manufacturer>
+        <Model>Windows for Docker</Model>
         <SupportHours>24/7</SupportHours>
         <SupportPhone />
-        <SupportProvider>Windows</SupportProvider>
+        <SupportProvider>Dockur</SupportProvider>
         <SupportURL>https://github.com/dockur/windows/issues</SupportURL>
       </OEMInformation>
-      <OEMName>Windows</OEMName>
+      <OEMName>Windows for Docker</OEMName>
     </component>
     <component name="Microsoft-Windows-ErrorReportingCore" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
       <DisableWER>1</DisableWER>
@@ -309,7 +309,7 @@
         </AdministratorPassword>
       </UserAccounts>
       <AutoLogon>
-        <Username>Windows</Username>
+        <Username>Docker</Username>
         <Enabled>true</Enabled>
         <LogonCount>65432</LogonCount>
         <Password>
@@ -333,8 +333,8 @@
         <SkipUserOOBE>true</SkipUserOOBE>
         <SkipMachineOOBE>true</SkipMachineOOBE>
       </OOBE>
-      <RegisteredOrganization>Windows</RegisteredOrganization>
-      <RegisteredOwner>Windows</RegisteredOwner>
+      <RegisteredOrganization>Dockur</RegisteredOrganization>
+      <RegisteredOwner>Windows for Docker</RegisteredOwner>
       <FirstLogonCommands>
         <SynchronousCommand wcm:action="add">
           <Order>1</Order>
@@ -353,7 +353,7 @@
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
           <Order>4</Order>
-          <CommandLine>cmd /C wmic useraccount where name="Windows" set PasswordExpires=false</CommandLine>
+          <CommandLine>cmd /C wmic useraccount where name="Docker" set PasswordExpires=false</CommandLine>
           <Description>Password Never Expires</Description>
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
@@ -438,8 +438,8 @@
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
           <Order>21</Order>
-          <CommandLine>cmd /C if exist "C:\OEM\install.bat" start "Install" "cmd /C C:\OEM\install.bat"</CommandLine>
-          <Description>Execute custom script from the OEM folder if exists</Description>
+          <CommandLine>cmd /C attrib -R "C:\oem\*.*" /S /D >> "C:\oem\unattend_log.txt" 2>&1 && start "Install" "cmd /C C:\oem\install.bat >> C:\oem\unattend_log.txt 2>&1"</CommandLine>
+          <Description>Remove the read-only attribute from all files and subdirectories in the oem folder, and execute the install.bat script</Description>
         </SynchronousCommand>
       </FirstLogonCommands>
     </component>
