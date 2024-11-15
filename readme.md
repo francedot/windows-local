@@ -16,6 +16,16 @@ Via Docker CLI:
 docker run -it --rm -p 8006:8006 --device=/dev/kvm --cap-add NET_ADMIN --mount type=bind,source=./custom.iso,target=/custom.iso --stop-timeout 120 windows-local:latest
 ```
 
+## Compatibility ⚙️
+
+| **Product**  | **Platform**   | |
+|---|---|---|
+| Docker Engine | Linux| ✅ |
+| Docker Desktop | Linux | ❌ |
+| Docker Desktop | macOS | ❌ |
+| Docker Desktop | Windows 11 | ✅ |
+| Docker Desktop | Windows 10 | ❌ |
+
 ## FAQ 💬
 
 ### How do I use it?
@@ -79,11 +89,11 @@ docker run -it --rm -p 8006:8006 --device=/dev/kvm --cap-add NET_ADMIN --mount t
 
 ### How do I share files with the host?
 
-  Open 'File Explorer' and click on the 'Network' section, you will see a computer called `host.lan`. Double-click it and it will show a folder called `Data`, which can be binded to any folder on your host via the compose file:
+  Open 'File Explorer' and click on the 'Network' section, you will see a computer called `host.lan`. Double-click it and it will show a folder called `Data`, which can be bound to any folder on your host via the compose file:
 
   ```yaml
   volumes:
-    -  /home/user/example:/shared
+    -  /home/user/example:/data
   ```
 
   The example folder `/home/user/example` will be available as ` \\host.lan\Data`.
@@ -125,6 +135,31 @@ docker run -it --rm -p 8006:8006 --device=/dev/kvm --cap-add NET_ADMIN --mount t
     USERNAME: "bill"
     PASSWORD: "gates"
   ```
+
+### How do I select the Windows language?
+
+  By default, the English version of Windows will be downloaded. But you can add the `LANGUAGE` environment variable to your compose file, in order to specify an alternative language:
+
+  ```yaml
+  environment:
+    LANGUAGE: "French"
+  ```
+  
+  You can choose between: 🇦🇪 Arabic, 🇧🇬 Bulgarian, 🇨🇳 Chinese, 🇭🇷 Croatian, 🇨🇿 Czech, 🇩🇰 Danish, 🇳🇱 Dutch, 🇬🇧 English, 🇪🇪 Estonian, 🇫🇮 Finnish, 🇫🇷 French, 🇩🇪 German, 🇬🇷 Greek, 🇮🇱 Hebrew, 🇭🇺 Hungarian, 🇮🇹 Italian, 🇯🇵 Japanese, 🇰🇷 Korean, 🇱🇻 Latvian, 🇱🇹 Lithuanian, 🇳🇴 Norwegian, 🇵🇱 Polish, 🇵🇹 Portuguese, 🇷🇴 Romanian, 🇷🇺 Russian, 🇷🇸 Serbian, 🇸🇰 Slovak, 🇸🇮 Slovenian, 🇪🇸 Spanish, 🇸🇪 Swedish, 🇹🇭 Thai, 🇹🇷 Turkish and 🇺🇦 Ukrainian.
+
+### How do I select the keyboard layout?
+
+  If you want to use a keyboard layout or locale that is not the default for your selected language, you can add the `KEYBOARD` and `REGION` variables with a culture code, like this:
+
+  ```yaml
+  environment:
+    REGION: "en-US"
+    KEYBOARD: "en-US"
+  ```
+
+> [!NOTE]  
+>  Changing these values will have no effect after the installation has been performed already. Use the control panel inside Windows in that case.
+>
 
 ### How do I connect using RDP?
 
@@ -210,7 +245,7 @@ docker run -it --rm -p 8006:8006 --device=/dev/kvm --cap-add NET_ADMIN --mount t
     - /dev/sdc:/disk2
   ```
 
-  Use `/disk1` if you want it to become your main drive, and use `/disk2` and higher to add them as secondary drives.
+  Use `/disk1` if you want it to become your main drive (which will be formatted during installation), and use `/disk2` and higher to add them as secondary drives (which will stay untouched).
 
 ### How do I pass-through a USB device?
 
@@ -228,18 +263,18 @@ docker run -it --rm -p 8006:8006 --device=/dev/kvm --cap-add NET_ADMIN --mount t
 
 ### How do I verify if my system supports KVM?
 
-  To verify that your system supports KVM, run the following commands:
+  Only Linux and Windows 11 support KVM virtualization, macOS and Windows 10 do not unfortunately.
+  
+  You can run the following commands in Linux to check your system:
 
   ```bash
   sudo apt install cpu-checker
   sudo kvm-ok
   ```
 
-  If you receive an error from `kvm-ok` indicating that KVM acceleration can't be used, please check whether:
+  If you receive an error from `kvm-ok` indicating that KVM cannot be used, please check whether:
 
   - the virtualization extensions (`Intel VT-x` or `AMD SVM`) are enabled in your BIOS.
-
-  - you are running an operating system that supports them, like Linux or Windows 11 (macOS and Windows 10 do not unfortunately).
 
   - you enabled "nested virtualization" if you are running the container inside a virtual machine.
 

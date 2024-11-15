@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-: "${XRES:=""}"
-: "${YRES:=""}"
+: "${WIDTH:=""}"
+: "${HEIGHT:=""}"
 : "${VERIFY:=""}"
 : "${REGION:=""}"
 : "${MANUAL:=""}"
@@ -14,7 +14,7 @@ set -Eeuo pipefail
 : "${USERNAME:=""}"
 : "${PASSWORD:=""}"
 
-MIRRORS=5
+MIRRORS=4
 PLATFORM="x64"
 
 parseVersion() {
@@ -26,7 +26,7 @@ parseVersion() {
   [ -z "$VERSION" ] && VERSION="win11"
 
   case "${VERSION,,}" in
-    "11" | "11p" | "win11" | "win11p" | "windows11" | "windows 11" )
+    "11" | "11p" | "win11" | "pro11" | "win11p" | "windows11" | "windows 11" )
       VERSION="win11x64"
       ;;
     "11e" | "win11e" | "windows11e" | "windows 11e" | "win11x64-enterprise-eval" )
@@ -75,7 +75,7 @@ getLanguage() {
       desc="English"
       culture="en-GB" ;;
     "en" | "en-"* )
-      lang="English (United States)"
+      lang="English"
       desc="English"
       culture="en-US" ;;
     "mx" | "es-mx" )
@@ -191,15 +191,15 @@ getLanguage() {
       desc="$lang"
       culture="uk-UA" ;;
     "hk" | "zh-hk" | "cn-hk" )
-      lang="Chinese Traditional"
+      lang="Chinese (Traditional)"
       desc="Chinese HK"
       culture="zh-TW" ;;
     "tw" | "zh-tw" | "cn-tw" )
-      lang="Chinese Traditional"
+      lang="Chinese (Traditional)"
       desc="Chinese TW"
       culture="zh-TW" ;;
     "zh" | "zh-"* | "cn" | "cn-"* )
-      lang="Chinese Simplified"
+      lang="Chinese (Simplified)"
       desc="Chinese"
       culture="zh-CN" ;;
   esac
@@ -278,7 +278,7 @@ printVersion() {
 
   if [ -z "$desc" ]; then
     desc="Windows"
-    [[ "${PLATFORM,,}" != "x64" ]] && desc="$desc for ${PLATFORM}"
+    [[ "${PLATFORM,,}" != "x64" ]] && desc+=" for ${PLATFORM}"
   fi
 
   echo "$desc"
@@ -316,6 +316,9 @@ fromName() {
   local name="$1"
   local arch="$2"
 
+  local add=""
+  [[ "$arch" != "x64" ]] && add="$arch"
+
   case "${name,,}" in
     *"windows 11"* ) id="win11${arch}" ;;
   esac
@@ -345,6 +348,51 @@ getVersion() {
   return 0
 }
 
+addFolder() {
+
+  local src="$1"
+  local folder="/oem"
+
+  [ ! -d "$folder" ] && folder="/OEM"
+  [ ! -d "$folder" ] && folder="$STORAGE/oem"
+  [ ! -d "$folder" ] && folder="$STORAGE/OEM"
+  [ ! -d "$folder" ] && return 0
+
+  local msg="Adding OEM folder to image..."
+  info "$msg" && html "$msg"
+
+  local dest="$src/\$OEM\$/\$1/OEM"
+  mkdir -p "$dest" || return 1
+  cp -Lr "$folder/." "$dest" || return 1
+
+  local file
+  file=$(find "$dest" -maxdepth 1 -type f -iname install.bat | head -n 1)
+  [ -f "$file" ] && unix2dos -q "$file"
+
+  return 0
+}
+
+migrateFiles() {
+
+  local base="$1"
+  local version="$2"
+  local file=""
+
+  [ -f "$base" ] && return 0
+
+  [[ "${version,,}" == "tiny10" ]] && file="tiny10_x64_23h2.iso"
+  [[ "${version,,}" == "tiny11" ]] && file="tiny11_2311_x64.iso"
+  [[ "${version,,}" == "core11" ]] && file="tiny11_core_x64_beta_1.iso"
+  [[ "${version,,}" == "winxpx86" ]] && file="en_windows_xp_professional_with_service_pack_3_x86_cd_x14-80428.iso"
+  [[ "${version,,}" == "winvistax64" ]] && file="en_windows_vista_sp2_x64_dvd_342267.iso"
+  [[ "${version,,}" == "win7x64" ]] && file="en_windows_7_enterprise_with_sp1_x64_dvd_u_677651.iso"
+
+  [ ! -f "$STORAGE/$file" ] && return 0
+  mv -f "$STORAGE/$file" "$base" || return 1
+
+  return 0
+}
+
 migrateFiles() {
 
   local base="$1"
@@ -354,7 +402,7 @@ migrateFiles() {
   [ -f "$base" ] && return 0
 
   [ ! -f "$STORAGE/$file" ] && return 0
-  ! mv -f "$STORAGE/$file" "$base" && return 1
+  mv -f "$STORAGE/$file" "$base" || return 1
 
   return 0
 }
