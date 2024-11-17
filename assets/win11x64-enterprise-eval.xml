@@ -295,7 +295,7 @@
       <UserAccounts>
         <LocalAccounts>
           <LocalAccount wcm:action="add">
-            <Name>Windows</Name>
+            <Name>Docker</Name>
             <Group>Administrators</Group>
             <Password>
               <Value />
@@ -453,8 +453,8 @@
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
           <Order>24</Order>
-          <CommandLine>cmd /C attrib -R "C:\oem\*.*" /S /D >> "C:\oem\unattend_log.txt" 2>&1 && start "Install" "cmd /C C:\oem\install.bat >> C:\oem\unattend_log.txt 2>&1"</CommandLine>
-          <Description>Remove the read-only attribute from all files and subdirectories in the oem folder, and execute the install.bat script</Description>
+          <CommandLine>cmd /C if exist "C:\OEM\install.bat" start "Install" "cmd /C C:\OEM\install.bat"</CommandLine>
+          <Description>Execute custom script from the OEM folder if exists</Description>
         </SynchronousCommand>
       </FirstLogonCommands>
     </component>
